@@ -122,3 +122,8 @@ end
 lvim.keys.normal_mode["<leader>j"] = function()
   require("treesj").toggle()
 end
+
+-- Keep Tree-sitter for folding/treesj/context, but stop illuminate from using it (prevents error spam)
+lvim.builtin.illuminate.options = {
+  providers = { "lsp", "regex" },
+}
