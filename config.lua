@@ -8,6 +8,9 @@
 -- Read the docs: https://www.lunarvim.org/docs/configuration
 -- ~/.config/lvim/config.lua
 
+-- Appearance
+lvim.colorscheme = "tokyonight"
+
 lvim.plugins = {
   -- Pretty text/code folding w/ mouse click
   {
@@ -119,11 +122,42 @@ lvim.keys.normal_mode["zp"] = function()
   require("ufo").peekFoldedLinesUnderCursor()
 end
 
-lvim.keys.normal_mode["<leader>j"] = function()
-  require("treesj").toggle()
-end
+-- Explorer navigation
+-- Window navigation (move between splits easily)
+lvim.keys.normal_mode["<C-S-h>"] = "<C-w>h"
+lvim.keys.normal_mode["<C-S-j>"] = "<C-w>j"
+lvim.keys.normal_mode["<C-S-k>"] = "<C-w>k"
+lvim.keys.normal_mode["<C-S-l>"] = "<C-w>l"
 
 -- Keep Tree-sitter for folding/treesj/context, but stop illuminate from using it (prevents error spam)
 lvim.builtin.illuminate.options = {
   providers = { "lsp", "regex" },
 }
+
+-- Add additional leader commands to leader pop-up
+local wk = require("which-key")
+wk.register({
+  t = {
+    name = "Treesitter",
+    c = { "<cmd>lua (function() local t=require('treesitter-context'); if t.enabled() then t.disable() else t.enable() end end)()<CR>", "Toggle TS context" },
+    g = { "<cmd>lua require('treesitter-context').go_to_context()<CR>", "Go to TS context" },
+  },
+  j = { "<cmd>lua require('treesj').toggle()<CR>", "Toggle join/split" },
+}, { prefix = "<leader>" })
+
+-- Filter the position_encoding warning without redefining vim.notify
+local orig_notify = vim.notify
+
+vim.notify = function(msg, level, opts)
+  if msg and (
+    msg:match("position_encoding param is required") or
+    msg:match("deprecated")
+  ) then
+    return
+  end
+  orig_notify(msg, level, opts)
+end
+
+-- Nvim-tree
+lvim.builtin.nvimtree.setup.view.side = "right"
+lvim.builtin.nvimtree.setup.view.width = 50
